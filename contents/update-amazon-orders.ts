@@ -28,31 +28,26 @@ const shipmentButtonsHtml: string = `<ul class="a-unordered-list a-nostyle a-ver
 </ul>`;
 
 const shipmentButtonsHtmlWithButtons: string = `<div class="a-button-stack a-spacing-mini">
-        <ul class="yohtmlc-shipment-level-connections" role="list">
-            <li><span class="a-list-item">
-                                </span></li>
-            <li class="a-list-item">
-        <span class="a-button a-button-normal a-spacing-mini a-button-primary" id="a-autoid-12"><span
+    <ul class="yohtmlc-shipment-level-connections a-nostyle" role="list">
+        <li>
+        <span class="a-button a-button-normal a-spacing-mini a-button-primary" id="a-autoid-16"><span
                 class="a-button-inner"><a
                 href="/spr/returns/prep?contractId=8fa292c5-7d94-4bb9-a5d0-8fdaa433ed26&amp;rmaId=DL60R505RRMA&amp;ingress=yo&amp;ref=ppx_yo2ov_dt_b_prep_status&amp;orderId=113-3597635-8821808"
-                class="a-button-text" role="button" id="a-autoid-12-announce">
+                class="a-button-text" role="button" id="a-autoid-16-announce">
             View return/refund status
         </a></span></span>
-            </li>
-            <li>
-                <span class="a-list-item">
-            </span>
-            </li>
-            <li class="a-list-item">
-        <span class="a-button a-button-normal a-spacing-mini a-button-base" id="a-autoid-13"><span
+        </li>
+        <li>
+        <span class="a-button a-button-normal a-spacing-mini a-button-base" id="a-autoid-17"><span
                 class="a-button-inner"><a
                 href="/review/review-your-purchases?asins=B0DJX79SSP&amp;channel=YAcc-wr&amp;ref=ppx_yo2ov_dt_b_rev_prod"
-                class="a-button-text" role="button" id="a-autoid-13-announce">
+                class="a-button-text" role="button" id="a-autoid-17-announce">
             Write a product review
         </a></span></span>
-            </li>
-        </ul>
-    </div>`
+        </li>
+
+    </ul>
+</div>`
 
 const orderBottomButtonsHtml: string = `
     <span class="a-button a-button-normal a-spacing-mini a-button-base" id="a-autoid-16"><span class="a-button-inner"><a href="/gp/buyagain?ats=eyJjdXN0b21lcklkIjoiQTFGQ1g4OVMwNkNIVVAiLCJleHBsaWNpdENhbmRpZGF0ZXMiOiJCMERKWDc5U1NQIn0%3D&amp;ref=ppx_yo2ov_dt_b_bia_item" class="a-button-text" role="button" id="a-autoid-16-announce">
@@ -78,7 +73,7 @@ const shipmentStatusSecondaryText =
 const whenWillIGetMyRefundText = ".yohtmlc-shipment-status-secondaryText ~ span";
 const shipmentRecipientText = ".yohtmlc-recipient span .a-popover-trigger";
 const shipmentBodyLeftColumnSelector = ".a-fixed-right-grid-col.a-col-left";
-const shipmentBodyRightColumnListSelector = ".a-fixed-right-grid-col.a-col-right ul.a-unordered-list";
+const shipmentBodyRightColumnListSelector = ".a-fixed-right-grid-col.a-col-right ul.yohtmlc-shipment-level-connections";
 const shipmentBodyRightColumnSelector = ".a-fixed-right-grid-col.a-col-right";
 const orderSmallText = ".a-row > .a-size-small";
 const orderBottomButtonsSelector = ".yohtmlc-item-level-connections";
