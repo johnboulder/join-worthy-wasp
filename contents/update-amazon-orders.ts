@@ -24,11 +24,14 @@ const isTargetProductPage = () =>
 const isOrdersPage = () => {
   const p = window.location.pathname
   return (
-    p.includes("/your-orders") ||
-    p.includes("/gp/your-orders") ||
-    p.includes("/gp/your-account/order-history")
+    p.includes("order-history")
   )
 }
+
+const isSearchPage = () => window.location.pathname.startsWith("/s")
+
+const isAnvilPage = () =>
+  window.location.pathname.includes("/VEVOR-Cast-Iron-Anvil-110")
 
 // Only run OIG logic in the top frame to avoid duplicates across iframes
 const inTopFrame = () => window.self === window.top
@@ -109,6 +112,8 @@ const primeShippingLabelHtml: string = `<div id="shippingMessageInsideBuyBox_fea
 </div>`;
 
 const deliveryDateBlockHtml: string = `<div class="a-spacing-base" id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE"><span data-csa-c-type="element" data-csa-c-content-id="DEXUnifiedCXPDM" data-csa-c-delivery-price="FREE" data-csa-c-value-proposition="" data-csa-c-delivery-type="delivery" data-csa-c-delivery-time="Tomorrow, October 14" data-csa-c-delivery-destination="" data-csa-c-delivery-condition="" data-csa-c-pickup-location="" data-csa-c-distance="" data-csa-c-delivery-cutoff="Order within 3 hrs 57 mins" data-csa-c-mir-view="CONSOLIDATED_CX" data-csa-c-mir-type="DELIVERY" data-csa-c-mir-sub-type="" data-csa-c-mir-variant="DEFAULT" data-csa-c-delivery-benefit-program-id="prime" data-csa-c-id="tkukb0-hbmly8-4ouhdl-czi5mp"> FREE delivery <span class="a-text-bold">Tomorrow, October 14</span>. Order within <span id="ftCountdown" class="ftCountdownClass" style="color: #067D62">3 hrs 57 mins</span> </span></div>`;
+
+const purchaseBadgeHtml: string = `<div class="a-section a-spacing-none puis-status-badge-container aok-relative s-grid-status-badge-container puis-expand-height"><span data-component-type="s-status-badge-component" class="rush-component mvt-badge-padding-3 mvt-badge-placement-3 mvt-badge-rectangle-shape mvt-badge-border-radius mvt-badge-font" data-component-props="{&quot;asin&quot;:&quot;B09H72B48P&quot;,&quot;badgeType&quot;:&quot;past-purchased&quot;}" data-version-id="v195egtts9kihz25kq5dz54fw0v" data-render-id="r38fi79ujaou3b2eylm4p1ys116" data-component-id="20"><span id="B09H72B48P-past-purchased" class="a-badge" data-a-badge-type="status"><span id="B09H72B48P-past-purchased-label" class="a-badge-label" data-a-badge-color="mvt-badge-color-dark-grey"><span class="a-badge-label-inner a-text-ellipsis"><span class="a-badge-text" data-a-badge-color="mvt-badge-text-color-white">Purchased Oct 2025</span></span></span></span></span></div>`;
 
 const shipmentStatusSecondaryTextHtml: string = `<div class="yohtmlc-shipment-status-secondaryText">
     <span class="delivery-box__secondary-text">Your return is complete. Your refund has been issued.</span>
@@ -580,7 +585,125 @@ const insertDeliveryDateBlockASAP = () => {
 // Start the delivery block updater early
 insertDeliveryDateBlockASAP()
 
- const handleOrderUpdatesOnLoad = () => {
+// Helper: current month-year like "Oct 2025"
+const getCurrentMonthYearShort = (): string => {
+  const d = new Date()
+  const mon = d.toLocaleString("en-US", { month: "short" })
+  return `${mon} ${d.getFullYear()}`
+}
+
+// Update any search result badges that match Purchased <Mon> <YYYY> to current month-year
+const updateSearchPurchaseBadges = () => {
+  if (!inTopFrame() || !isSearchPage()) return
+  const purchasedPattern = /^Purchased\s+[A-Za-z]{3,9}\s+\d{4}$/i
+  const desired = `Purchased ${getCurrentMonthYearShort()}`
+
+  document.querySelectorAll<HTMLSpanElement>(".a-badge-text").forEach((el) => {
+    if (el.getAttribute("data-copilot-badge") === "1") return
+    const txt = (el.textContent || "").trim()
+    if (purchasedPattern.test(txt)) {
+      if (txt !== desired) {
+        el.textContent = desired
+      }
+      el.setAttribute("data-copilot-badge", "1")
+    }
+  })
+}
+
+// Keep watching the search page for dynamically loaded results
+let sustainedSearchObserver: MutationObserver | null = null
+let scheduledSearchUpdate = false
+const startSustainedSearchObserver = () => {
+  if (!isSearchPage()) return
+  if (sustainedSearchObserver) return
+  sustainedSearchObserver = new MutationObserver(() => {
+    if (scheduledSearchUpdate) return
+    scheduledSearchUpdate = true
+    requestAnimationFrame(() => {
+      scheduledSearchUpdate = false
+      updateSearchPurchaseBadges()
+    })
+  })
+  const root: Node = document.body || document.documentElement
+  sustainedSearchObserver.observe(root, { childList: true, subtree: true })
+}
+
+startSustainedSearchObserver()
+
+// Helper: format a past date like "Oct 11, 2025" for en-US
+const getPastDisplayDateShort = (daysAgo: number): string => {
+  const d = new Date()
+  d.setDate(d.getDate() - daysAgo)
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  })
+}
+
+const findReturnedOnSpan = (): HTMLSpanElement | null => {
+  const spans = document.querySelectorAll<HTMLSpanElement>(".a-alert-content span")
+  const pattern = /^You returned this on\s+[A-Za-z]{3}\s+\d{1,2},\s+\d{4}$/
+  for (const s of spans) {
+    const t = (s.textContent || "").trim()
+    if (pattern.test(t)) return s
+  }
+  return null
+}
+
+const replaceReturnedOnDate = () => {
+  if (!inTopFrame() || !isAnvilPage()) return
+  const span = findReturnedOnSpan()
+  if (!span) return
+  if (span.getAttribute("data-copilot-returned") === "1") return
+
+  const targetDate = getPastDisplayDateShort(2)
+  span.textContent = `You returned this on ${targetDate}`
+  span.setAttribute("data-copilot-returned", "1")
+}
+
+const insertReturnedOnDateASAP = () => {
+  if (!inTopFrame() || !isAnvilPage()) return
+
+  const tryUpdate = () => {
+    if (!isAnvilPage()) return
+    const span = findReturnedOnSpan()
+    if (span) {
+      replaceReturnedOnDate()
+      stopIfUpdated()
+    }
+  }
+
+  // Fast path
+  tryUpdate()
+
+  // Observe for late DOM
+  const mo = new MutationObserver(() => requestAnimationFrame(tryUpdate))
+  const root: Node = document.body || document.documentElement
+  mo.observe(root, { childList: true, subtree: true })
+
+  // Also poll briefly to catch async loads
+  const timer = window.setInterval(tryUpdate, 400)
+
+  let completionMo: MutationObserver | null = null
+  const stopIfUpdated = () => {
+    const span = findReturnedOnSpan()
+    if (span && span.getAttribute("data-copilot-returned") === "1") {
+      mo.disconnect()
+      clearInterval(timer)
+      if (completionMo) completionMo.disconnect()
+    }
+  }
+
+  completionMo = new MutationObserver(stopIfUpdated)
+  completionMo.observe(document.documentElement, { childList: true, subtree: true })
+  stopIfUpdated()
+}
+
+// Start the returned-on normalization early
+insertReturnedOnDateASAP()
+
+const handleOrderUpdatesOnLoad = () => {
   if (isOrdersPage()) {
     updateOrdersPrice();
     updateOrderImages();
@@ -596,14 +719,16 @@ insertDeliveryDateBlockASAP()
     removeOrderSmallText();
     replaceOrderBottomButtons();
   } else if (isTargetProductPage()) {
-    // Ensure OIG exists if for some reason early observer missed it and #ppd is present
     if (!document.getElementById("orderInformationGroup") && findPpd()) {
       replaceOrderInformationGroup();
     }
-    // Opportunistically attempt the Prime label insert if everything is now present
     replacePrimeShippingLabel();
-    // Opportunistically update the delivery date block
     replaceDeliveryDateBlock();
+  } else if (isAnvilPage()) {
+    replaceReturnedOnDate();
+  } else if (isSearchPage()) {
+    updateSearchPurchaseBadges();
+    startSustainedSearchObserver();
   }
 
   document.documentElement.classList.remove("plasmo-prep");
