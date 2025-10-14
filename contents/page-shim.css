@@ -1,0 +1,15 @@
+/* src/contents/example.css */
+html.plasmo-prep * {
+  transition: none !important; /* avoid janky transitions while we edit */
+}
+
+/* Optional: if you must hide a specific element until rewritten */
+html.plasmo-prep #target-selector {
+  visibility: hidden;
+}
+
+/* Prevent OIG from flashing in the wrong place while we wait for stable anchors */
+html.plasmo-prep #orderInformationGroup,
+html.plasmo-prep [data-feature-name="orderInformationGroup"] {
+  visibility: hidden;
+}
