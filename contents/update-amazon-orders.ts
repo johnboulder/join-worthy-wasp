@@ -24,7 +24,9 @@ const isTargetProductPage = () =>
 const isOrdersPage = () => {
   const p = window.location.pathname
   return (
-    p.includes("order-history")
+      p.includes("/your-orders") ||
+      p.includes("/gp/your-orders") ||
+      p.includes("order-history")
   )
 }
 
