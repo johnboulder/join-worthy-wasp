@@ -106,7 +106,7 @@ const injectStyles = () => {
 
     /* Close Button */
     .amazon-wrapped-close {
-      position: absolute;
+      position: fixed;
       top: 30px;
       right: 30px;
       width: 50px;
@@ -120,9 +120,10 @@ const injectStyles = () => {
       color: white;
       font-size: 28px;
       cursor: pointer;
-      z-index: 10;
+      z-index: 1000005;
       transition: all 0.3s ease;
       border: 2px solid rgba(255, 255, 255, 0.2);
+      pointer-events: auto;
     }
 
     .amazon-wrapped-close:hover {
@@ -417,7 +418,7 @@ const injectStyles = () => {
 
     .announcement-boxes-container {
       position: fixed;
-      top: 10%;
+      top: 1%;
       left: 0;
       right: 0;
       display: flex;
@@ -628,7 +629,17 @@ const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
         return flakes
     }, []) // Empty dependency array means this only runs once
 
+    // Add ESC key handler to close at any time
+    React.useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose()
+            }
+        }
 
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [onClose])
 
     // React.useEffect(() => {
     //   // Auto-advance slides after 3 seconds
@@ -653,6 +664,20 @@ const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
             {/* Delivery message */}
             {showDelivery && (
                 <>
+                    {/* Close button - available on announcement screen */}
+                    <motion.div
+                        className="amazon-wrapped-close"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onClose()
+                        }}
+                        initial={{opacity: 0, scale: 0.8}}
+                        animate={{opacity: 1, scale: 1}}
+                        transition={{duration: 0.3, delay: 0.2}}
+                    >
+                        ✕
+                    </motion.div>
+
                     <motion.div
                         className="amazon-wrapped-delivery"
                         onClick={startSlideshow}
@@ -815,9 +840,9 @@ const WrappedTrigger = ({onClick}: { onClick: () => void }) => {
         <motion.button
             className="amazon-wrapped-trigger"
             onClick={onClick}
-            initial={{scale: 0, opacity: 0}}
-            animate={{scale: 1, opacity: 1}}
-            transition={{delay: 1, type: "spring"}}
+            initial={{y: 100, opacity: 0}}
+            animate={{y: 0, opacity: 1}}
+            transition={{duration: 0.4, ease: "easeOut"}}
             whileHover={{scale: 1.05}}
             whileTap={{scale: 0.95}}
         >
