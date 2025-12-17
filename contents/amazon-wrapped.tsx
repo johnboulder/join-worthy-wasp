@@ -11,9 +11,7 @@ import slide5Bg from "data-base64:~assets/slides/slide_5.png"
 import slide6Bg from "data-base64:~assets/slides/slide_6.png"
 import slide7Bg from "data-base64:~assets/slides/slide_7.png"
 import snowLight from "data-base64:~assets/ambient/ambient-snow-light.png"
-import sparkleGold from "data-base64:~assets/ambient/ambient-sparkle-gold.png"
-import ribbonBlue from "data-base64:~assets/ambient/ribbon-curve-blue.png"
-import ribbonLarge from "data-base64:~assets/ambient/ribbon-curve-lg.png"
+import announcementBoxes from "data-base64:~assets/announcement-boxes.png"
 
 export const config: PlasmoCSConfig = {
     matches: ["https://www.amazon.com/*"],
@@ -140,8 +138,8 @@ const injectStyles = () => {
       color: white;
       margin-bottom: 20px;
       text-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.4),
-        0 8px 40px rgba(0, 0, 0, 0.2);
+        0 2px 10px rgba(0, 0, 0, 0.5),
+        0 4px 20px rgba(0, 0, 0, 0.3);
       line-height: 1;
       letter-spacing: -0.02em;
       position: relative;
@@ -155,8 +153,8 @@ const injectStyles = () => {
       color: white;
       margin-bottom: 20px;
       text-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.4),
-        0 8px 40px rgba(0, 0, 0, 0.2);
+        0 2px 10px rgba(0, 0, 0, 0.5),
+        0 4px 20px rgba(0, 0, 0, 0.3);
       line-height: 1;
       letter-spacing: -0.02em;
       position: relative;
@@ -171,8 +169,8 @@ const injectStyles = () => {
       margin: 20px 0;
       text-align: center;
       text-shadow: 
-        0 2px 10px rgba(0, 0, 0, 0.3),
-        0 4px 20px rgba(0, 0, 0, 0.2);
+        0 2px 10px rgba(0, 0, 0, 0.5),
+        0 4px 20px rgba(0, 0, 0, 0.3);
       line-height: 1.1;
       letter-spacing: -0.01em;
       position: relative;
@@ -187,7 +185,10 @@ const injectStyles = () => {
       margin: 15px 0;
       text-align: center;
       max-width: 85%;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      text-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.8),
+        0 4px 16px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 0, 0, 0.4);
       position: relative;
       z-index: 1;
       line-height: 1.3;
@@ -197,11 +198,14 @@ const injectStyles = () => {
     .amazon-wrapped-subtext {
       font-size: 18px;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.75);
+      color: rgba(255, 255, 255, 0.95);
       margin: 8px 0;
       text-align: center;
       max-width: 85%;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      text-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.8),
+        0 4px 16px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 0, 0, 0.4);
       position: relative;
       z-index: 1;
       line-height: 1.4;
@@ -211,12 +215,15 @@ const injectStyles = () => {
     .amazon-wrapped-detail {
       font-size: 18px;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.85);
+      color: rgba(255, 255, 255, 0.95);
       margin: 15px 0 10px 0;
       text-align: center;
       max-width: 90%;
       font-style: italic;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      text-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.8),
+        0 4px 16px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 0, 0, 0.4);
       position: relative;
       z-index: 1;
       line-height: 1.4;
@@ -377,102 +384,78 @@ const injectStyles = () => {
     /* Falling snow */
     .snow-flake {
       position: absolute;
-      width: 30px;
-      height: 30px;
+      width: 400px;
+      height: auto;
       opacity: 0;
-      animation: snow-fall linear forwards;
+      animation: snow-fall linear infinite;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+      perspective: 1000px;
     }
 
     @keyframes snow-fall {
       0% {
-        transform: translateY(-100px) translateX(0) rotate(0deg);
+        transform: translate3d(0, -100px, 0);
         opacity: 0.8;
       }
       100% {
-        transform: translateY(100vh) translateX(var(--drift)) rotate(360deg);
+        transform: translate3d(var(--drift), 100vh, 0);
         opacity: 0.3;
       }
     }
 
-    /* Sparkling gold - fade in/out randomly */
-    .sparkle {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      opacity: 0;
-      animation: sparkle-twinkle 3s ease-in-out infinite;
-    }
 
-    @keyframes sparkle-twinkle {
-      0%, 100% {
-        opacity: 0;
-        transform: scale(0.5) rotate(0deg);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.2) rotate(180deg);
-      }
-    }
-
-    /* Ribbon animations - wind effect */
-    .ribbon {
-      position: absolute;
-      pointer-events: none;
-      animation: ribbon-sway ease-in-out infinite;
-    }
-
-    .ribbon-blue {
-      width: 150px;
-      height: auto;
-    }
-
-    .ribbon-large {
-      width: 200px;
-      height: auto;
-    }
-
-    @keyframes ribbon-sway {
-      0%, 100% {
-        transform: translateX(0) translateY(0) rotate(0deg);
-      }
-      25% {
-        transform: translateX(15px) translateY(-10px) rotate(5deg);
-      }
-      50% {
-        transform: translateX(0) translateY(-15px) rotate(0deg);
-      }
-      75% {
-        transform: translateX(-15px) translateY(-10px) rotate(-5deg);
-      }
-    }
 
     /* Delivery message */
     .amazon-wrapped-delivery {
       position: fixed;
       inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       z-index: 1000003;
-      text-align: center;
       cursor: pointer;
       pointer-events: auto;
     }
 
-    .delivery-box {
-      font-size: 120px;
-      animation: box-bounce 1s ease-in-out infinite;
-      margin-bottom: 30px;
+    .announcement-boxes-container {
+      position: fixed;
+      top: 10%;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      z-index: 1000004;
+      pointer-events: none;
     }
 
-    @keyframes box-bounce {
+    .announcement-boxes-image {
+      width: 500px;
+      height: auto;
+      animation: boxes-float 3s ease-in-out infinite;
+    }
+
+    @keyframes boxes-float {
       0%, 100% {
-        transform: translateY(0) scale(1);
+        transform: translateY(0px);
       }
       50% {
-        transform: translateY(-20px) scale(1.1);
+        transform: translateY(-20px);
       }
+    }
+
+    .announcement-content {
+      position: fixed;
+      bottom: 35%;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      z-index: 1000004;
+      pointer-events: none;
+    }
+
+    .announcement-content > * {
+      pointer-events: auto;
     }
 
     .delivery-message {
@@ -501,6 +484,7 @@ const injectStyles = () => {
       border: 2px solid rgba(255, 255, 255, 0.2);
       transition: all 0.3s ease;
       box-shadow: 0 8px 20px rgba(255, 153, 0, 0.4);
+      cursor: pointer;
     }
 
     .delivery-cta:hover {
@@ -532,34 +516,38 @@ injectStyles()
 const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
     const [currentSlide, setCurrentSlide] = React.useState(0)
     const [showDelivery, setShowDelivery] = React.useState(true)
+    const [isTransitioning, setIsTransitioning] = React.useState(false)
 
     const slides = [
         // ...existing code...
         {
-            title: "Your 2025 Amazon Year",
+            title: "Your Year, Delivered",
             subtitle: "Let's look back at your shopping journey",
             color: "#FF9900",
             backgroundImage: slide1Bg
         },
         {
-            subtitle: "You ordered 354 items this year",
-            subtext: "That's almost one a day ya lil shopping freak!",
+            title: "It Was a Big Year!",
+            subtitle: "You ordered 354 items!",
+            subtext: "That's almost one a day ya lil shopping freak! Also Charlie Kirk got shot?",
             stat: "354",
             color: "#146EB4",
             backgroundImage: slide2Bg
         },
         {
+            title: "Money Well Spent",
             subtitle: "Total Spent on Amazon in 2025",
-            subtext: "That's higher than the average individual US wage, ok money-bags!",
+            subtext: "Hope you got some good deals!",
             stat: "$77,526",
             statSize: "small",
             color: "#232F3E",
             backgroundImage: slide3Bg
         },
         {
-            title: "Your Top Category",
-            subtitle: "Tools & Home Improvement",
-            subtext: "You really love building things!",
+            title: "Shopper Type:\nThe Fixer",
+            subtitle: "You love fixing things!",
+            subtext: "This is based on your favorite order category: Tools & Home Improvement",
+            statSize: "small",
             color: "#FF9900",
             backgroundImage: slide4Bg
         },
@@ -568,7 +556,7 @@ const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
             subtitle: "VEVOR Cast Iron Anvil",
             subtext: "Ordered 354 times this year!",
             image: anvilImage,
-            detail: "Wow! That's dedication!",
+            detail: "You were among the top 0.0001% of purchasers!",
             color: "#146EB4",
             backgroundImage: slide5Bg
         },
@@ -590,28 +578,38 @@ const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
     ]
 
     const nextSlide = () => {
+        if (isTransitioning) return // Prevent clicks during transition
+
+        setIsTransitioning(true)
+
         if (currentSlide < slides.length - 1) {
             setCurrentSlide(currentSlide + 1)
         } else {
             onClose()
         }
+
+        // Reset transition lock after animation completes
+        setTimeout(() => setIsTransitioning(false), 400)
     }
 
     const startSlideshow = () => {
+        if (isTransitioning) return
+        setIsTransitioning(true)
         setShowDelivery(false)
+        setTimeout(() => setIsTransitioning(false), 400)
     }
 
-    // Generate falling snow
-    const generateSnow = () => {
-        const snowFlakes = []
+    // Generate falling snow - memoized to prevent regenerating on every render
+    const snowFlakes = React.useMemo(() => {
+        const flakes = []
 
         for (let i = 0; i < 50; i++) {
-            const left = Math.random() * 100
+            const left = Math.random() * 110 - 5 // -5% to 105% to cover edges
             const delay = Math.random() * 5
             const duration = 8 + Math.random() * 4
             const drift = (Math.random() - 0.5) * 100 // Random horizontal drift
 
-            snowFlakes.push(
+            flakes.push(
                 <img
                     key={`snow-${i}`}
                     src={snowLight}
@@ -627,91 +625,10 @@ const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
             )
         }
 
-        return snowFlakes
-    }
+        return flakes
+    }, []) // Empty dependency array means this only runs once
 
-    // Generate sparkles that appear and disappear
-    const generateSparkles = () => {
-        const sparkles = []
 
-        for (let i = 0; i < 15; i++) {
-            const left = Math.random() * 90 + 5 // 5-95%
-            const top = Math.random() * 90 + 5 // 5-95%
-            const delay = Math.random() * 3
-            const duration = 2 + Math.random() * 2
-
-            sparkles.push(
-                <img
-                    key={`sparkle-${i}`}
-                    src={sparkleGold}
-                    alt=""
-                    className="sparkle"
-                    style={{
-                        left: `${left}%`,
-                        top: `${top}%`,
-                        animationDelay: `${delay}s`,
-                        animationDuration: `${duration}s`
-                    }}
-                />
-            )
-        }
-
-        return sparkles
-    }
-
-    // Generate wind-blown ribbons
-    const generateRibbons = () => {
-        const ribbons = []
-
-        // Blue ribbon positions
-        const bluePositions = [
-            { left: '10%', top: '15%' },
-            { left: '85%', top: '25%' },
-            { left: '15%', top: '70%' }
-        ]
-
-        // Large ribbon positions
-        const largePositions = [
-            { left: '75%', top: '60%' },
-            { left: '5%', top: '45%' }
-        ]
-
-        bluePositions.forEach((pos, i) => {
-            ribbons.push(
-                <img
-                    key={`ribbon-blue-${i}`}
-                    src={ribbonBlue}
-                    alt=""
-                    className="ribbon ribbon-blue"
-                    style={{
-                        left: pos.left,
-                        top: pos.top,
-                        animationDuration: `${4 + Math.random() * 2}s`,
-                        animationDelay: `${Math.random() * 2}s`
-                    }}
-                />
-            )
-        })
-
-        largePositions.forEach((pos, i) => {
-            ribbons.push(
-                <img
-                    key={`ribbon-large-${i}`}
-                    src={ribbonLarge}
-                    alt=""
-                    className="ribbon ribbon-large"
-                    style={{
-                        left: pos.left,
-                        top: pos.top,
-                        animationDuration: `${5 + Math.random() * 2}s`,
-                        animationDelay: `${Math.random() * 2}s`
-                    }}
-                />
-            )
-        })
-
-        return ribbons
-    }
 
     // React.useEffect(() => {
     //   // Auto-advance slides after 3 seconds
@@ -723,29 +640,52 @@ const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
 
     return (
         <div className="amazon-wrapped-container">
-            {/* Ambient animations */}
-            {!showDelivery && (
-                <div className="ambient-container">
-                    {generateSnow()}
-                    {generateSparkles()}
-                    {generateRibbons()}
-                </div>
-            )}
+            {/* Ambient animations - always visible */}
+            <motion.div
+                className="ambient-container"
+                initial={{opacity: 0}}
+                animate={{opacity: 1}}
+                transition={{duration: 0.3}}
+            >
+                {snowFlakes}
+            </motion.div>
 
             {/* Delivery message */}
             {showDelivery && (
-                <motion.div
-                    className="amazon-wrapped-delivery"
-                    onClick={startSlideshow}
-                    initial={{opacity: 0, scale: 0.8}}
-                    animate={{opacity: 1, scale: 1}}
-                    transition={{duration: 0.5}}
-                >
-                    <div className="delivery-box">📦</div>
-                    <div className="delivery-message">Your 2025 Amazon Wrapped</div>
-                    <div className="delivery-message">has been delivered!</div>
-                    <div className="delivery-cta">Unwrap</div>
-                </motion.div>
+                <>
+                    <motion.div
+                        className="amazon-wrapped-delivery"
+                        onClick={startSlideshow}
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        transition={{duration: 0.3}}
+                    />
+
+                    <motion.div
+                        className="announcement-boxes-container"
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        transition={{duration: 0.3}}
+                    >
+                        <img
+                            src={announcementBoxes}
+                            alt="Gift boxes"
+                            className="announcement-boxes-image"
+                        />
+                    </motion.div>
+
+                    <motion.div
+                        className="announcement-content"
+                        onClick={startSlideshow}
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        transition={{duration: 0.3}}
+                    >
+                        <div className="delivery-message">Your 2025 Amazon Wrapped</div>
+                        <div className="delivery-message">has been delivered!</div>
+                        <div className="delivery-cta">Unwrap</div>
+                    </motion.div>
+                </>
             )}
 
             {/* Backdrop overlay - separate from content */}
@@ -755,6 +695,7 @@ const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
                 initial={{opacity: 0}}
                 animate={{opacity: .5}}
                 exit={{opacity: 0}}
+                transition={{duration: 0.3}}
                 onClick={showDelivery ? startSlideshow : nextSlide}
             />
 
@@ -784,7 +725,7 @@ const AmazonWrapped = ({onClose}: { onClose: () => void }) => {
                         initial={{scale: 0.8, opacity: 0}}
                         animate={{scale: 1, opacity: 1}}
                         exit={{scale: 1.2, opacity: 0}}
-                        transition={{duration: 0.5}}
+                        transition={{duration: 0.4}}
                     >
                         {/* ...existing slide content... */}
                         {slide.stat && (
