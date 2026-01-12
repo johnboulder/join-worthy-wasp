@@ -243,7 +243,24 @@ const shipmentBodyRightColumnSelector = ".a-fixed-right-grid-col.a-col-right";
 const orderSmallText = ".a-row > .a-size-small";
 const orderBottomButtonsSelector = ".yohtmlc-item-level-connections";
 
+const rightRailSelector = ".right-rail";
+// const unorderedListSelector = ".a-unordered-list";
+// const rightRailListItemSelector = ".right-rail .a-unordered-list > li";
+// const rightRailListItemImageSelector = ".right-rail .a-unordered-list > li img";
+// const rightRailListItemPriceSelector = ".right-rail .a-unordered-list > li img";
+// const rightRailListItemNameSelector = ".right-rail .a-unordered-list > li img";
+
+
 const processedElements = new WeakSet<Element>()
+
+const removeRightRail = () => {
+  document.querySelectorAll(rightRailSelector).forEach((el) => {
+    if (!processedElements.has(el)) {
+      el.remove();
+      processedElements.add(el);
+    }
+  });
+};
 
 const updateOrdersPrice = () => {
   document.querySelectorAll(totalAmountSelector).forEach((el) => {
@@ -491,64 +508,44 @@ const insertOrderHeadersForCancelledOrders = () => {
 };
 
 const insertViewInvoiceButtons = () => {
-  console.log("🔍 insertViewInvoiceButtons: Starting");
-  // First, find all cancelled order cards
   const orderCards = document.querySelectorAll(".js-order-card");
-  console.log(`🔍 insertViewInvoiceButtons: Found ${orderCards.length} order cards`);
 
-  orderCards.forEach((orderCard, index) => {
-    console.log(`🔍 insertViewInvoiceButtons: Processing order card ${index + 1}`);
-
+  orderCards.forEach((orderCard) => {
     // Use a different key for this function to avoid conflicts
     const processedKey = `invoiceButtons-${(orderCard as HTMLElement).dataset?.orderId || ''}`;
     if (processedElements.has(orderCard) && (orderCard as any)[processedKey]) {
-      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} already processed, skipping`);
       return;
     }
 
     // Check if this order is cancelled
     const statusElement = orderCard.querySelector(shipmentStatusText);
-    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Status element:`, statusElement);
-    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Status text:`, statusElement?.textContent?.trim());
-
     const isCancelled = statusElement?.textContent?.trim().toLowerCase().includes("cancelled");
-    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Is cancelled: ${isCancelled}`);
 
     if (!isCancelled) {
-      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} not cancelled, skipping`);
       (orderCard as any)[processedKey] = true;
       return;
     }
 
     // Find the single target element within this cancelled order
     const targetElement = orderCard.querySelector(headerButtonsParentSelector);
-    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Target element (${headerButtonsParentSelector}):`, targetElement);
 
     if (!targetElement) {
-      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - No target element found, skipping`);
       (orderCard as any)[processedKey] = true;
       return;
     }
 
     // Since the order is cancelled, add the buttons to the header
-    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Inserting buttons`);
     const buttonsElement = document.createElement("div");
     buttonsElement.className = "a-row";
     buttonsElement.innerHTML = viewInvoiceButtonsHtml;
     const buttonsChild = buttonsElement.firstElementChild as HTMLElement;
-    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Buttons child:`, buttonsChild);
 
     if (buttonsChild) {
       targetElement.appendChild(buttonsChild);
-      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Buttons successfully inserted`);
-    } else {
-      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - No buttons child found!`);
     }
 
     (orderCard as any)[processedKey] = true;
   });
-
-  console.log("🔍 insertViewInvoiceButtons: Complete");
 };
 
 const replaceOrderInformationGroup = () => {
@@ -914,6 +911,7 @@ const handleOrderUpdatesOnLoad = () => {
     updateShipmentRecipientText();
     removeOrderSmallText();
     replaceOrderBottomButtons();
+    removeRightRail();
   } else if (isTargetProductPage()) {
     if (!document.getElementById("orderInformationGroup") && findPpd()) {
       replaceOrderInformationGroup();
