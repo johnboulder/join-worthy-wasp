@@ -134,9 +134,7 @@ const shipmentStatusSecondaryTextHtml: string = `<div class="yohtmlc-shipment-st
     </a>
         </div>`;
 
-const shipmentButtonsHtmlWithButtons: string = `<div class="a-button-stack a-spacing-mini">
-    <ul class="yohtmlc-shipment-level-connections a-nostyle" role="list">
-        <li>
+const shipmentButtonsHtmlWithButtons: string = `<li>
         <span class="a-button a-button-normal a-spacing-mini a-button-primary" id="a-autoid-16"><span
                 class="a-button-inner"><a
                 href="/spr/returns/prep?contractId=8fa292c5-7d94-4bb9-a5d0-8fdaa433ed26&amp;rmaId=DL60R505RRMA&amp;ingress=yo&amp;ref=ppx_yo2ov_dt_b_prep_status&amp;orderId=113-3597635-8821808"
@@ -151,10 +149,7 @@ const shipmentButtonsHtmlWithButtons: string = `<div class="a-button-stack a-spa
                 class="a-button-text" role="button" id="a-autoid-17-announce">
             Write a product review
         </a></span></span>
-        </li>
-
-    </ul>
-</div>`
+        </li>`
 
 const orderBottomButtonsHtml: string = `
     <span class="a-button a-button-normal a-spacing-mini a-button-base" id="a-autoid-16"><span class="a-button-inner"><a href="/gp/buyagain?ats=eyJjdXN0b21lcklkIjoiQTFGQ1g4OVMwNkNIVVAiLCJleHBsaWNpdENhbmRpZGF0ZXMiOiJCMERKWDc5U1NQIn0%3D&amp;ref=ppx_yo2ov_dt_b_bia_item" class="a-button-text" role="button" id="a-autoid-16-announce">
@@ -166,8 +161,7 @@ const orderBottomButtonsHtml: string = `
         </a></span></span>`;
 
 const viewInvoiceButtonsHtml: string = `
-<div class="a-row">
-    <li class="order-header__header-list-item yohtmlc-order-level-connections" role="presentation">
+<li class="order-header__header-list-item yohtmlc-order-level-connections" role="presentation">
         <a class="a-link-normal"
            href="/your-orders/order-details?orderID=113-4698305-4065814&amp;ref=ppx_yo2ov_dt_b_fed_order_details">
             View order details
@@ -178,7 +172,6 @@ const viewInvoiceButtonsHtml: string = `
             View invoice
         </a>
     </li>
-</div>
 `;
 
 const totalHeaderHtml: string = `
@@ -381,21 +374,15 @@ const updateShipmentStatusPrimaryText = () => {
 };
 
 const updateOrderButtons = () => {
-  // Remove old button lists from shipment body right column
+  // Replace children of button lists in shipment body right column
   document.querySelectorAll(shipmentBodyRightColumnListSelector).forEach((el) => {
     if (!processedElements.has(el)) {
-      el.remove();
-    }
-  });
-
-  // Insert buttons into shipment body right column
-  document.querySelectorAll(shipmentBodyRightColumnSelector).forEach((el) => {
-    if (!processedElements.has(el) && !(el.querySelectorAll(".a-text-right .a-link-normal").length > 0)) {
-
-      const newChild = document.createElement("ul");
-      newChild.className = "a-unordered-list a-nostyle a-vertical";
-      newChild.innerHTML = shipmentButtonsHtmlWithButtons;
-      el.insertAdjacentElement("afterbegin", newChild);
+      // Clear all existing children
+      while (el.firstChild) {
+        el.removeChild(el.firstChild);
+      }
+      // Insert new button HTML
+      el.innerHTML = shipmentButtonsHtmlWithButtons;
       processedElements.add(el);
     }
   });
@@ -504,42 +491,64 @@ const insertOrderHeadersForCancelledOrders = () => {
 };
 
 const insertViewInvoiceButtons = () => {
+  console.log("🔍 insertViewInvoiceButtons: Starting");
   // First, find all cancelled order cards
-  document.querySelectorAll(".js-order-card").forEach((orderCard) => {
+  const orderCards = document.querySelectorAll(".js-order-card");
+  console.log(`🔍 insertViewInvoiceButtons: Found ${orderCards.length} order cards`);
+
+  orderCards.forEach((orderCard, index) => {
+    console.log(`🔍 insertViewInvoiceButtons: Processing order card ${index + 1}`);
+
     // Use a different key for this function to avoid conflicts
     const processedKey = `invoiceButtons-${(orderCard as HTMLElement).dataset?.orderId || ''}`;
-    if (processedElements.has(orderCard) && (orderCard as any)[processedKey]) return;
+    if (processedElements.has(orderCard) && (orderCard as any)[processedKey]) {
+      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} already processed, skipping`);
+      return;
+    }
 
     // Check if this order is cancelled
     const statusElement = orderCard.querySelector(shipmentStatusText);
+    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Status element:`, statusElement);
+    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Status text:`, statusElement?.textContent?.trim());
+
     const isCancelled = statusElement?.textContent?.trim().toLowerCase().includes("cancelled");
+    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Is cancelled: ${isCancelled}`);
 
     if (!isCancelled) {
+      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} not cancelled, skipping`);
       (orderCard as any)[processedKey] = true;
       return;
     }
 
     // Find the single target element within this cancelled order
     const targetElement = orderCard.querySelector(headerButtonsParentSelector);
+    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Target element (${headerButtonsParentSelector}):`, targetElement);
+
     if (!targetElement) {
+      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - No target element found, skipping`);
       (orderCard as any)[processedKey] = true;
       return;
     }
 
-    // Check if the buttons already exist
-    const hasButtons = targetElement.querySelector(".yohtmlc-order-level-connections");
+    // Since the order is cancelled, add the buttons to the header
+    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Inserting buttons`);
+    const buttonsElement = document.createElement("div");
+    buttonsElement.className = "a-row";
+    buttonsElement.innerHTML = viewInvoiceButtonsHtml;
+    const buttonsChild = buttonsElement.firstElementChild as HTMLElement;
+    console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Buttons child:`, buttonsChild);
 
-    if (!hasButtons) {
-      const buttonsElement = document.createElement("div");
-      buttonsElement.innerHTML = viewInvoiceButtonsHtml;
-      const buttonsChild = buttonsElement.firstElementChild as HTMLElement;
-      if (buttonsChild) {
-        targetElement.appendChild(buttonsChild);
-      }
+    if (buttonsChild) {
+      targetElement.appendChild(buttonsChild);
+      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - Buttons successfully inserted`);
+    } else {
+      console.log(`🔍 insertViewInvoiceButtons: Order card ${index + 1} - No buttons child found!`);
     }
 
     (orderCard as any)[processedKey] = true;
   });
+
+  console.log("🔍 insertViewInvoiceButtons: Complete");
 };
 
 const replaceOrderInformationGroup = () => {
