@@ -165,6 +165,75 @@ const orderBottomButtonsHtml: string = `
             View your item
         </a></span></span>`;
 
+const viewInvoiceButtonsHtml: string = `
+<div class="a-row">
+    <li class="order-header__header-list-item yohtmlc-order-level-connections" role="presentation">
+        <a class="a-link-normal"
+           href="/your-orders/order-details?orderID=113-4698305-4065814&amp;ref=ppx_yo2ov_dt_b_fed_order_details">
+            View order details
+        </a>
+        <i class="a-icon a-icon-text-separator" role="img"></i>
+        <a class="a-link-normal"
+           href="/gp/css/summary/print.html?orderID=113-4698305-4065814&amp;ref=ppx_yo2ov_dt_b_fed_invoice_pos">
+            View invoice
+        </a>
+    </li>
+</div>
+`;
+
+const totalHeaderHtml: string = `
+<div class="a-column a-span2">
+    <li class="order-header__header-list-item" role="presentation">
+        <div class="a-row a-size-mini">
+            <span class="a-color-secondary a-text-caps">Total</span>
+        </div>
+        <div class="a-row">
+            <span class="a-size-base a-color-secondary aok-break-word">$227.31</span>
+        </div>
+    </li>
+</div>`;
+
+const shipToHeaderHtml: string = `
+<div class="a-column a-span7 a-span-last">
+    <li class="order-header__header-list-item" role="presentation">
+        <div class="yohtmlc-recipient">
+            <div class="a-row a-size-mini">
+                <span class="a-color-secondary a-text-caps">Ship to</span>
+            </div>
+            <div class="a-row a-size-base">
+
+                <div id="shipToInsertionNode-shippingAddress-cffb91d45d67428011db3cdb9e75a229">
+    <span class="a-declarative" data-action="a-popover"
+          data-a-popover="{&quot;name&quot;:&quot;shippingAddress-cffb91d45d67428011db3cdb9e75a229&quot;,&quot;position&quot;:&quot;triggerBottom&quot;,&quot;closeButton&quot;:true,&quot;width&quot;:&quot;250&quot;,&quot;popoverLabel&quot;:&quot;Recipient address&quot;,&quot;closeButtonLabel&quot;:&quot;Close recipient address&quot;}">
+        <a href="javascript:void(0)"
+           class="a-popover-trigger a-declarative insert-encrypted-trigger-text aok-break-word">John Stockwell</a>
+    </span>
+                    <div class="a-popover-preload" id="a-popover-shippingAddress-cffb91d45d67428011db3cdb9e75a229">
+            <span class="a-color-base">
+                    <div class="a-row">
+                        <h5>
+                            Rebecca Mosena
+                        </h5>
+                    </div>
+                    <div class="a-row">
+                        3317 W BELDEN AVE UNIT 1<br>CHICAGO, IL 60647-2509
+                    </div>
+                    <div class="a-row">
+                        United States
+                    </div>
+            </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </li>
+</div>
+`;
+
+const totalHeaderParentSelector = ".order-header__header-list > div > div";
+const cancelledOrderCardHeaderList = ".a-column.a-span12.a-span-last";
+const headerButtonsParentSelector = ".order-header__header-list > :nth-child(2)";
+
 const totalAmountSelector =
   ".a-column.a-span2 > .order-header__header-list-item > .a-row > .aok-break-word"
 const productImageSelector = ".product-image > a > img"
@@ -312,13 +381,17 @@ const updateShipmentStatusPrimaryText = () => {
 };
 
 const updateOrderButtons = () => {
+  // Remove old button lists from shipment body right column
   document.querySelectorAll(shipmentBodyRightColumnListSelector).forEach((el) => {
     if (!processedElements.has(el)) {
       el.remove();
     }
   });
+
+  // Insert buttons into shipment body right column
   document.querySelectorAll(shipmentBodyRightColumnSelector).forEach((el) => {
     if (!processedElements.has(el) && !(el.querySelectorAll(".a-text-right .a-link-normal").length > 0)) {
+
       const newChild = document.createElement("ul");
       newChild.className = "a-unordered-list a-nostyle a-vertical";
       newChild.innerHTML = shipmentButtonsHtmlWithButtons;
@@ -360,6 +433,112 @@ const replaceOrderBottomButtons = () => {
       parentOfButtons.insertAdjacentElement("afterbegin", newChild);
       processedElements.add(el);
     }
+  });
+};
+
+const updateCancelledOrderCardHeaderClasses = () => {
+  document.querySelectorAll(cancelledOrderCardHeaderList).forEach((el) => {
+    if (!processedElements.has(el)) {
+      // Check if this element is in a cancelled order
+      const orderCard = el.closest(".js-order-card");
+      if (orderCard) {
+        const statusElement = orderCard.querySelector(shipmentStatusText);
+        const isCancelled = statusElement?.textContent?.trim().toLowerCase().includes("cancelled");
+
+        if (isCancelled) {
+          // Update the class to a-column a-span3
+          el.className = "a-column a-span3";
+        }
+      }
+      processedElements.add(el);
+    }
+  });
+};
+
+const insertOrderHeadersForCancelledOrders = () => {
+  // First, find all cancelled order cards
+  document.querySelectorAll(".js-order-card").forEach((orderCard) => {
+    if (processedElements.has(orderCard)) return;
+
+    // Check if this order is cancelled
+    const statusElement = orderCard.querySelector(shipmentStatusText);
+    const isCancelled = statusElement?.textContent?.trim().toLowerCase().includes("cancelled");
+
+    if (!isCancelled) {
+      processedElements.add(orderCard);
+      return;
+    }
+
+    // Find the single target element within this cancelled order
+    const targetElement = orderCard.querySelector(totalHeaderParentSelector);
+    if (!targetElement) {
+      processedElements.add(orderCard);
+      return;
+    }
+
+
+    // Check if the total header already exists
+    const hasTotalHeader = targetElement.querySelector(".a-column.a-span2 .order-header__header-list-item");
+    const hasShipToHeader = targetElement.querySelector(".a-column.a-span7 .order-header__header-list-item");
+
+    if (!hasTotalHeader) {
+      const totalHeaderElement = document.createElement("div");
+      totalHeaderElement.innerHTML = totalHeaderHtml;
+      const totalHeaderChild = totalHeaderElement.firstElementChild as HTMLElement;
+      if (totalHeaderChild) {
+        targetElement.appendChild(totalHeaderChild);
+      }
+    }
+
+    if (!hasShipToHeader) {
+      const shipToHeaderElement = document.createElement("div");
+      shipToHeaderElement.innerHTML = shipToHeaderHtml;
+      const shipToHeaderChild = shipToHeaderElement.firstElementChild as HTMLElement;
+      if (shipToHeaderChild) {
+        targetElement.appendChild(shipToHeaderChild);
+      }
+    }
+
+    processedElements.add(orderCard);
+  });
+};
+
+const insertViewInvoiceButtons = () => {
+  // First, find all cancelled order cards
+  document.querySelectorAll(".js-order-card").forEach((orderCard) => {
+    // Use a different key for this function to avoid conflicts
+    const processedKey = `invoiceButtons-${(orderCard as HTMLElement).dataset?.orderId || ''}`;
+    if (processedElements.has(orderCard) && (orderCard as any)[processedKey]) return;
+
+    // Check if this order is cancelled
+    const statusElement = orderCard.querySelector(shipmentStatusText);
+    const isCancelled = statusElement?.textContent?.trim().toLowerCase().includes("cancelled");
+
+    if (!isCancelled) {
+      (orderCard as any)[processedKey] = true;
+      return;
+    }
+
+    // Find the single target element within this cancelled order
+    const targetElement = orderCard.querySelector(headerButtonsParentSelector);
+    if (!targetElement) {
+      (orderCard as any)[processedKey] = true;
+      return;
+    }
+
+    // Check if the buttons already exist
+    const hasButtons = targetElement.querySelector(".yohtmlc-order-level-connections");
+
+    if (!hasButtons) {
+      const buttonsElement = document.createElement("div");
+      buttonsElement.innerHTML = viewInvoiceButtonsHtml;
+      const buttonsChild = buttonsElement.firstElementChild as HTMLElement;
+      if (buttonsChild) {
+        targetElement.appendChild(buttonsChild);
+      }
+    }
+
+    (orderCard as any)[processedKey] = true;
   });
 };
 
@@ -707,6 +886,13 @@ insertReturnedOnDateASAP()
 
 const handleOrderUpdatesOnLoad = () => {
   if (isOrdersPage()) {
+    // Run all cancelled order detection BEFORE changing status text
+    updateCancelledOrderCardHeaderClasses();
+    insertOrderHeadersForCancelledOrders();
+    insertViewInvoiceButtons();
+    updateOrderButtons();
+
+    // Now it's safe to change status text and continue with other updates
     updateOrdersPrice();
     updateOrderImages();
     updateOrderProductTitles();
@@ -717,7 +903,6 @@ const handleOrderUpdatesOnLoad = () => {
     removeShipmentStatusSecondaryText();
     updateShipmentStatusPrimaryText();
     updateShipmentRecipientText();
-    updateOrderButtons();
     removeOrderSmallText();
     replaceOrderBottomButtons();
   } else if (isTargetProductPage()) {
